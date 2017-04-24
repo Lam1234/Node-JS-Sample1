@@ -9,28 +9,25 @@
 	<div class="chat">
 		
 		<input type="text" class="chat-name" placeholder="Enter your name">
+
 		<div class="chat-messages">
 			<div class="chat-message">
-				Alex: Hello
+
+				
 			
-
-
 			</div>
 
 			<div class="chat-message">
-				Billy: Hello
+
+				
 			
-
-
 			</div>
-			s
-
-
+			
 		</div>
+
 		<textarea  placeholder="Type your message"></textarea>
+
 		<div class="chat-status">Status: <span>Idle</span></div>
-
-
 
 	</div>
 
@@ -43,40 +40,39 @@
  		var getNode = function(s){
 
  			return document.querySelector(s);
+
  		},
 
  		//Get required nodes
  		status = getNode('.chat-status span'),
+ 		messages = getNode('.chat-messages'),
  		textarea = getNode('.chat textarea'),
  		chatName = getNode('.chat-name');
  		
  		statusDefault = status.textContent,
 
- 		setStatus = function(){
+ 		setStatus = function(s){
 
  			status.textContent = s;
 
- 			//if string is not equal to idle
+ 			//if string is not equal to idle status
  			if(s!==statusDefault){
 
- 				//afrer 3 seconds, it returns to idle
+ 				//afrer 3 seconds, it returns to idle status
  				var delay =setTimeout(function(){
 
  					setStatus(statusDefault);
  					clearInterval(delay);
+
  				}, 3000);
  			}
- 		
-
  		};
 
  		setStatus('Testing.');
 
-
  		try{
 
  			var socket = io.connect('http://127.0.0.1:8090');
-
 
  		}catch(e){
  			//Set status to warn user
@@ -84,9 +80,30 @@
 
  		if(socket !== undefined){
 
+ 			//listen for output
+ 			socket.on('output', function(data){
+ 				console.log(data);
+
+ 				if(data.length){
+
+ 					for(var x = 0; x < data.length; x = x+1){
+
+ 						var message = docuemnt.createElement('div');
+
+ 						message.setAttribute('class', 'chat-message');
+ 						message.textContent = data[x].name + ':' + data[x].message;
+
+ 						//append
+ 						messages.appendChild(message);
+ 						messages.insertBefore(message, message.firstChild);
+ 					}
+ 				}
+
+ 			});
+
  			//listen for a status
  			socket.on('stauts', function(data){
- 				setStatus((typeof data === 'object')? data.message :data);
+ 				setStatus((typeof data === 'object')? data.message : data);
 
  				if(data.clear === true){
  					textarea.value='';
@@ -94,10 +111,10 @@
 
  			});
 
- 			//listen for keydown
+ 			//listen for keydown, send the input to server
  		  textarea.addEventListen('keydown',function(event){
 
- 		  	//this means textarea
+ 		  	//'this' means textarea
  		    var self = this,
 
  		    	name = chatName.value;
@@ -108,22 +125,19 @@
 
  		    			name:name,
  		    			message:self.value
+
  		    		});
 
  		    		event.preventDefault();
  		    			
  		    	}
+
  		  });
 
  		}
 
-
-
-
  })();
 
-
 </script>
-
 </body>
 </html>
